@@ -154,7 +154,8 @@ void OsgQuickNode::renderOsgFrame()
     {
         QSGGeometry::updateTexturedRectGeometry(&_qGeometry,
                                                 QRectF(0, 0, _quickWindow->width(), _quickWindow->height()),
-                                                QRectF(0, 0, 1, 1));
+                                                // invert uv not to get an y flipped result
+                                                QRectF(0, 1, 1, -1)); // normally this would be 0, 0, 1, 1
 
         _qTexture = _quickWindow->createTextureFromId(getGLtexId(), _quickWindow->size());
 
