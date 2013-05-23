@@ -145,7 +145,7 @@ void OsgQuickNode::renderOsgFrame()
         _dirtyFBO = false;
     }
 
-    std::cout << "viewer->frame()" << std::endl;
+    //std::cout << "viewer->frame()" << std::endl;
     _osgViewer->frame();
 
 
@@ -317,7 +317,7 @@ osg::Node* OsgQuickNode::createScene()
     geode->getOrCreateStateSet()->setAttributeAndModes(pProg);
 
     _pat = new osg::PositionAttitudeTransform;
-    _pat->setPosition(osg::Vec3(30, 0, -10));
+    _pat->setPosition(osg::Vec3(30, 0, 10));
     _pat->addChild(geode);
 
     _pat->addUpdateCallback(new RotateLocalSceneCallback(_pat));

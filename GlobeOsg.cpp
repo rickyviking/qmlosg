@@ -115,7 +115,7 @@ bool GlobeOsg::getAnimate()
 QSGNode* GlobeOsg::updatePaintNode(QSGNode* qNode, UpdatePaintNodeData* qNodeData)
 {
 
-    std::cout << "updatePaintNode() " << std::endl;
+    //std::cout << "updatePaintNode() " << std::endl;
 
 
     // also create a debug earth item

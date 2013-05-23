@@ -21,19 +21,16 @@ public:
     OsgQuickNode();
     ~OsgQuickNode();
 
+    // neede to setup the osg viewer correcly
+    void setQuickWindow(QQuickWindow *window);
+
     void setSize(const QSize &size);
     QSize size() const { return m_size; }
 
-    void setQuickWindow(QQuickWindow *window);
-
     void setAAEnabled(bool enable);
 
-    void renderOsgFrame();
-
-    void init();
-
+    // called by qt when the "UsePreprocess" flag is set
     void preprocess();
-    void updateFBO();
 
     // return osg viewer, mainly for setting scene, camera manipulator, etc...
     osgViewer::Viewer* getViewer(){ return _osgViewer.get();}
@@ -41,9 +38,14 @@ public:
 protected:
 
     // internal utility for osg rendering/binding
+    void init();
     void saveOsgState();
     void restoreOsgState();
     GLuint getGLtexId();
+    void updateFBO();
+
+    void renderOsgFrame();
+
 
     // TEST scene
     osg::Node* createScene();
@@ -57,11 +59,9 @@ protected:
     // QtQuick container window
     QQuickWindow *_quickWindow;
 
-
     int _samples;
     bool _AAEnabled;
     QSize m_size;
-
 
     bool _initialized;
     bool _dirtyFBO;
@@ -70,7 +70,6 @@ protected:
     QOpenGLContext* _osgContext;
     // Pointer to QOpenGLContext to be restored after OSG context
     QOpenGLContext* _qtContext;
-
 
     // osg stuff
     osg::ref_ptr<osgViewer::Viewer> _osgViewer;
