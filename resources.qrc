@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file alias="globe.vert">media/shaders/globe.vert</file>
+        <file alias="globe.frag">media/shaders/globe.frag</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file alias="earth.png">media/images/earth.png</file>
+    </qresource>
+</RCC>
