@@ -73,10 +73,9 @@ GlobeOsg::GlobeOsg() :
     _osgQuickNode(NULL),
     _zoomProp(1.0)
 {
-    m_texture = QImage(":/images/earth.png");
-
     setFlag(ItemHasContents);
 
+    // start timer to force a render loop
     startTimer(16);
 }
 

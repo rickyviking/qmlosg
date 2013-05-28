@@ -185,15 +185,8 @@ void OsgQuickNode::updateFBO()
     //delete m_texture;
     //m_texture = m_quickWindow->createTextureFromId(nativeTexture->getGLID(), m_size);
 
-    /*
-    m_texture = m_quickWindow->createTextureFromImage(m_earthImage);
-
-    m_material.setTexture(m_texture);
-    m_materialO.setTexture(m_texture);
-    */
-
-    //setTexture(_quickWindow->createTextureFromImage(QImage(":/images/earth.png")));
-
+    //m_material.setTexture(m_texture);
+    //m_materialO.setTexture(m_texture);
 }
 
 void OsgQuickNode::setSize(const QSize &size)
