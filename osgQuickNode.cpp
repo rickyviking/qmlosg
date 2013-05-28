@@ -138,6 +138,12 @@ void OsgQuickNode::renderOsgFrame()
     // restore the osg gl context
     //restoreOsgState();
 
+    if(!_osgViewer->isRealized())
+    {
+        OSG_ALWAYS << "osgViewer REALIZE called!" << std::endl;
+        _osgViewer->realize();
+    }
+
 
     if (_dirtyFBO)
     {
@@ -167,9 +173,6 @@ void OsgQuickNode::renderOsgFrame()
 
     // we're done with the osg state, restore the Qt one
     //saveOsgState();
-
-    // this call should not be needed as we're using the preprocess flag
-    markDirty(QSGNode::DirtyMaterial);
 }
 
 void OsgQuickNode::updateFBO()
@@ -263,7 +266,6 @@ void OsgQuickNode::init()
     _osgViewer->setSceneData(sceneRoot);
 #endif
 
-    _osgViewer->realize();
 }
 
 GLuint OsgQuickNode::getGLtexId()

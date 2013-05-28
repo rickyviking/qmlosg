@@ -114,12 +114,7 @@ bool GlobeOsg::getAnimate()
 
 QSGNode* GlobeOsg::updatePaintNode(QSGNode* qNode, UpdatePaintNodeData* qNodeData)
 {
-
     //std::cout << "updatePaintNode() " << std::endl;
-
-
-    // also create a debug earth item
-    static QSGSimpleTextureNode* s_simpleTexNode;
 
     if(!_osgQuickNode)
     {
@@ -127,10 +122,6 @@ QSGNode* GlobeOsg::updatePaintNode(QSGNode* qNode, UpdatePaintNodeData* qNodeDat
         _osgQuickNode->setQuickWindow(window());
 
         setupScene();
-
-        s_simpleTexNode = new QSGSimpleTextureNode;
-        s_simpleTexNode->setRect(0, 0, window()->width(), window()->height());
-        s_simpleTexNode->setTexture(window()->createTextureFromImage(m_texture));
     }
 
     // pass events here if any occured
@@ -153,23 +144,6 @@ QSGNode* GlobeOsg::updatePaintNode(QSGNode* qNode, UpdatePaintNodeData* qNodeDat
         _mouseDragVec.clear();
     }
 
-
-    // modify rotation and scale according to user input
-    //_pat->setAttitude(rotationY * rotationX);
-    //_pat->setScale(osg::Vec3(m_fScale, m_fScale, m_fScale));
-
-    /*
-    if(qNode == s_simpleTexNode)
-    {
-        std::cout << "return osgNode" << std::endl;
-        return _osgQuickNode;
-    }
-    else
-    {
-        std::cout << "return simpleTex" << std::endl;
-        return s_simpleTexNode;
-    }
-    */
     return _osgQuickNode;
 
 }
@@ -261,14 +235,12 @@ void GlobeOsg::_mousePressEvent(int x, int y)
     // fwd mouse event to osg
     _mousePressVec.push_back(osg::Vec2(x, y));
     //_osgViewer->getEventQueue()->mouseButtonPress(x, y, osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON);
-
-    std::cout << "Event passed to the viewe" << std::endl;
 }
 
 void GlobeOsg::_mouseDragEvent(int x, int y)
 {
     // fwd mouse event to osg
-    std::cout << "MouseDragged at " << x << ", "  << y << std::endl;
+    //std::cout << "MouseDragged at " << x << ", "  << y << std::endl;
     _mouseDragVec.push_back(osg::Vec2(x, y));
     //_osgViewer->getEventQueue()->mouseMotion(x, y);
 }
