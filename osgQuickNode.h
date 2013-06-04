@@ -41,8 +41,6 @@ protected:
 
     // internal utility for osg rendering/binding
     void init();
-    void saveOsgState();
-    void restoreOsgState();
     void updateFBO();
 
     void renderOsgFrame();
@@ -63,7 +61,6 @@ protected:
     // Qt FBO to render to with OSG
     QOpenGLFramebufferObject* _qFBO;
 
-    int _samples;
     bool _AAEnabled;
     QSize m_size;
 

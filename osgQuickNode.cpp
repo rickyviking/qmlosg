@@ -56,8 +56,8 @@ OsgQuickNode::OsgQuickNode()
     : QSGGeometryNode()
     , _qGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4)
     , _qTexture(0)
-    , _samples(0)
     , _quickWindow(0)
+    , _qFBO(NULL)
     , _osgContext(0)
     , _qtContext(0)
     , _AAEnabled(false)
@@ -77,41 +77,6 @@ OsgQuickNode::~OsgQuickNode()
 
 }
 
-
-void OsgQuickNode::saveOsgState()
-{
-    //    QOpenGLContext *ctx = QOpenGLContext::currentContext();
-    //    ctx->functions()->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //    ctx->functions()->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    //    ctx->functions()->glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    //    ctx->functions()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-
-    //    ctx->doneCurrent();
-
-
-    _osgContext->doneCurrent();
-
-    _qtContext->makeCurrent(_quickWindow);
-
-    //glPushAttrib(GL_ALL_ATTRIB_BITS);
-}
-
-void OsgQuickNode::restoreOsgState()
-{
-    //glPopAttrib();
-
-    _qtContext = QOpenGLContext::currentContext();
-
-    //_qtContext->functions()->glUseProgram(0);
-
-    _qtContext->doneCurrent();
-
-    _osgContext->makeCurrent(_quickWindow);
-    //m_osgContext->functions()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_ogreFBO);
-}
-
-
-
 void OsgQuickNode::preprocess()
 {
     //std::cout << "preprocess() " << std::endl;
@@ -123,18 +88,19 @@ void OsgQuickNode::setQuickWindow(QQuickWindow *window)
 {
     _quickWindow = window;
 
+    // save a reference to the current openGL context
+    _qtContext = QOpenGLContext::currentContext();
+    _qtContext->doneCurrent();
+
+
     // create a new shared OpenGL context to be used exclusively by OSG
     _osgContext = new QOpenGLContext();
-    _osgContext->setFormat(_quickWindow->requestedFormat());
-    _osgContext->setShareContext(QOpenGLContext::currentContext());
+    _osgContext->setShareContext(_qtContext);
+    _osgContext->setFormat(_qtContext->format());
     _osgContext->create();
 
-
-    QSize size =  _quickWindow->size();
-    QOpenGLFramebufferObjectFormat format;
-    format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-    _qFBO = new QOpenGLFramebufferObject(size, format);
-    _qTexture = _quickWindow->createTextureFromId(_qFBO->texture(), size);
+    // make current again the original context
+    _qtContext->makeCurrent(_quickWindow);
 
     // ok, now init the viewer as embedded, with render target to FBO
     init();
@@ -144,15 +110,26 @@ void OsgQuickNode::setQuickWindow(QQuickWindow *window)
 void OsgQuickNode::renderOsgFrame()
 {
     // restore the osg gl context
-    //restoreOsgState();
+//    _qtContext->doneCurrent();
+//    _osgContext->makeCurrent(_quickWindow);
 
-    _qFBO->bind();
 
     if(!_osgViewer->isRealized())
     {
         OSG_ALWAYS << "osgViewer REALIZE called!" << std::endl;
         _osgViewer->realize();
     }
+
+    if(_qFBO == NULL)
+    {
+        QSize size =  _quickWindow->size();
+        QOpenGLFramebufferObjectFormat format;
+        format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+        _qFBO = new QOpenGLFramebufferObject(size, format);
+        _qTexture = _quickWindow->createTextureFromId(_qFBO->texture(), size);
+    }
+
+    _qFBO->bind();
 
 
     if (_dirtyFBO)
@@ -182,7 +159,8 @@ void OsgQuickNode::renderOsgFrame()
     _qFBO->release();
 
     // we're done with the osg state, restore the Qt one
-    //saveOsgState();
+//    _osgContext->doneCurrent();
+//    _qtContext->makeCurrent(_quickWindow);
 }
 
 void OsgQuickNode::updateFBO()
@@ -221,13 +199,8 @@ void OsgQuickNode::setAAEnabled(bool enable)
 
 void OsgQuickNode::init()
 {
-    const QOpenGLContext *ctx = QOpenGLContext::currentContext();
-    QSurfaceFormat format = ctx->format();
-    _samples = format.samples();
-
     int viewWidth = _quickWindow->width();
     int viewHeight = _quickWindow->height();
-
 
     // create the view of the scene.
     _osgViewer = new osgViewer::Viewer;
