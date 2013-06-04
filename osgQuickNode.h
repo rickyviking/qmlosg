@@ -9,6 +9,8 @@
 
 #include <QtQuick/QSGFlatColorMaterial>
 
+#include <QtGui/QOpenGLFramebufferObject>
+
 // osg
 #include <osgViewer/Viewer>
 #include <osg/PositionAttitudeTransform>
@@ -41,7 +43,6 @@ protected:
     void init();
     void saveOsgState();
     void restoreOsgState();
-    GLuint getGLtexId();
     void updateFBO();
 
     void renderOsgFrame();
@@ -59,6 +60,9 @@ protected:
     // QtQuick container window
     QQuickWindow *_quickWindow;
 
+    // Qt FBO to render to with OSG
+    QOpenGLFramebufferObject* _qFBO;
+
     int _samples;
     bool _AAEnabled;
     QSize m_size;
@@ -74,7 +78,6 @@ protected:
     // osg stuff
     osg::ref_ptr<osgViewer::Viewer> _osgViewer;
     osg::ref_ptr<osg::PositionAttitudeTransform> _pat;
-    osg::ref_ptr<osg::Texture2D> _fboTex;
 };
 
 #endif // OSG_QUICK_NODE_H

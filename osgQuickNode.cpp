@@ -129,14 +129,24 @@ void OsgQuickNode::setQuickWindow(QQuickWindow *window)
     _osgContext->setShareContext(QOpenGLContext::currentContext());
     _osgContext->create();
 
+
+    QSize size =  _quickWindow->size();
+    QOpenGLFramebufferObjectFormat format;
+    format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    _qFBO = new QOpenGLFramebufferObject(size, format);
+    _qTexture = _quickWindow->createTextureFromId(_qFBO->texture(), size);
+
     // ok, now init the viewer as embedded, with render target to FBO
     init();
+
 }
 
 void OsgQuickNode::renderOsgFrame()
 {
     // restore the osg gl context
     //restoreOsgState();
+
+    _qFBO->bind();
 
     if(!_osgViewer->isRealized())
     {
@@ -163,13 +173,13 @@ void OsgQuickNode::renderOsgFrame()
                                                 // invert uv not to get an y flipped result
                                                 QRectF(0, 1, 1, -1)); // normally this would be 0, 0, 1, 1
 
-        _qTexture = _quickWindow->createTextureFromId(getGLtexId(), _quickWindow->size());
-
         _qTexMaterial.setTexture(_qTexture);
         _qOpaqueMaterial.setTexture(_qTexture);
 
         _initialized = true;
     }
+
+    _qFBO->release();
 
     // we're done with the osg state, restore the Qt one
     //saveOsgState();
@@ -231,26 +241,9 @@ void OsgQuickNode::init()
     // tell the viewer to render on an FBO
     osg::Camera* pCamera = _osgViewer->getCamera();
     pCamera->setViewport(0, 0, viewWidth, viewHeight);
-    pCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
 
     // set a grey background color
     pCamera->setClearColor(osg::Vec4(0.7, 0.7, 0.7, 1.0));
-
-    // attach a texture
-    osg::Texture2D* texture2D = new osg::Texture2D;
-    texture2D->setTextureSize(viewWidth, viewHeight);
-    texture2D->setInternalFormat(GL_RGBA);
-    texture2D->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::LINEAR);
-    texture2D->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::LINEAR);
-
-    // attach the texture and use it as the color buffer.
-    pCamera->attach(osg::Camera::COLOR_BUFFER, texture2D,
-                    0, 0, false,
-                    _samples, _samples);
-
-    // save a reference to the texture object bound to the fbo
-    _fboTex = texture2D;
-
 
 #if 1
     // create a sample scene
@@ -258,18 +251,6 @@ void OsgQuickNode::init()
     sceneRoot->addChild(createScene());
     _osgViewer->setSceneData(sceneRoot);
 #endif
-
-}
-
-GLuint OsgQuickNode::getGLtexId()
-{
-    if(_fboTex.valid())
-    {
-        unsigned int ctxId = _osgViewer->getCamera()->getGraphicsContext()->getState()->getContextID();
-        return _fboTex->getTextureObject(ctxId)->id();
-    }
-
-    return 0;
 
 }
 
