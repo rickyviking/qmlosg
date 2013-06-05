@@ -74,6 +74,7 @@ protected:
 
     // osg stuff
     osg::ref_ptr<osgViewer::Viewer> _osgViewer;
+    osg::ref_ptr<osg::StateSet> _viewerSS;
     osg::ref_ptr<osg::PositionAttitudeTransform> _pat;
 };
 

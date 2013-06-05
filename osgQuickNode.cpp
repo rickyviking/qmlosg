@@ -110,8 +110,14 @@ void OsgQuickNode::setQuickWindow(QQuickWindow *window)
 void OsgQuickNode::renderOsgFrame()
 {
     // restore the osg gl context
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    _osgViewer->getCamera()->getGraphicsContext()->getState()->reset();
+    _osgViewer->getCamera()->getGraphicsContext()->getState()->apply(_viewerSS);
+
 //    _qtContext->doneCurrent();
 //    _osgContext->makeCurrent(_quickWindow);
+
 
 
     if(!_osgViewer->isRealized())
@@ -158,7 +164,12 @@ void OsgQuickNode::renderOsgFrame()
 
     _qFBO->release();
 
+
     // we're done with the osg state, restore the Qt one
+    _osgViewer->getCamera()->getGraphicsContext()->getState()->captureCurrentState(*_viewerSS);
+
+    glPopAttrib();
+
 //    _osgContext->doneCurrent();
 //    _qtContext->makeCurrent(_quickWindow);
 }
@@ -217,6 +228,9 @@ void OsgQuickNode::init()
 
     // set a grey background color
     pCamera->setClearColor(osg::Vec4(0.7, 0.7, 0.7, 1.0));
+
+    // create a stateset to save and restore the viewer's global state
+    _viewerSS = new osg::StateSet;
 
 #if 1
     // create a sample scene
