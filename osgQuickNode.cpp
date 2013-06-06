@@ -109,15 +109,9 @@ void OsgQuickNode::setQuickWindow(QQuickWindow *window)
 
 void OsgQuickNode::renderOsgFrame()
 {
-    // restore the osg gl context
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-    _osgViewer->getCamera()->getGraphicsContext()->getState()->reset();
-    _osgViewer->getCamera()->getGraphicsContext()->getState()->apply(_viewerSS);
-
-//    _qtContext->doneCurrent();
-//    _osgContext->makeCurrent(_quickWindow);
-
+    // switch to the osg gl context
+    _qtContext->doneCurrent();
+    _osgContext->makeCurrent(_quickWindow);
 
 
     if(!_osgViewer->isRealized())
@@ -162,16 +156,14 @@ void OsgQuickNode::renderOsgFrame()
         _initialized = true;
     }
 
+    // important! flush here to make sure the whole drawing is done on this frame!
+    glFlush();
+
     _qFBO->release();
 
-
-    // we're done with the osg state, restore the Qt one
-    _osgViewer->getCamera()->getGraphicsContext()->getState()->captureCurrentState(*_viewerSS);
-
-    glPopAttrib();
-
-//    _osgContext->doneCurrent();
-//    _qtContext->makeCurrent(_quickWindow);
+    // we're done with the osg openGL context, restore the original one use by Qt
+    _osgContext->doneCurrent();
+    _qtContext->makeCurrent(_quickWindow);
 }
 
 void OsgQuickNode::updateFBO()
