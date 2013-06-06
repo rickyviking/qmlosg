@@ -80,34 +80,16 @@ OsgQuickNode::~OsgQuickNode()
 
 void OsgQuickNode::saveOsgState()
 {
-    //    QOpenGLContext *ctx = QOpenGLContext::currentContext();
-    //    ctx->functions()->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //    ctx->functions()->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    //    ctx->functions()->glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    //    ctx->functions()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-
-    //    ctx->doneCurrent();
-
-
     _osgContext->doneCurrent();
-
     _qtContext->makeCurrent(_quickWindow);
-
-    //glPushAttrib(GL_ALL_ATTRIB_BITS);
 }
 
 void OsgQuickNode::restoreOsgState()
 {
-    //glPopAttrib();
-
     _qtContext = QOpenGLContext::currentContext();
-
-    //_qtContext->functions()->glUseProgram(0);
-
     _qtContext->doneCurrent();
 
     _osgContext->makeCurrent(_quickWindow);
-    //m_osgContext->functions()->glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_ogreFBO);
 }
 
 
@@ -136,7 +118,7 @@ void OsgQuickNode::setQuickWindow(QQuickWindow *window)
 void OsgQuickNode::renderOsgFrame()
 {
     // restore the osg gl context
-    //restoreOsgState();
+    restoreOsgState();
 
     if(!_osgViewer->isRealized())
     {
@@ -154,6 +136,7 @@ void OsgQuickNode::renderOsgFrame()
     //std::cout << "viewer->frame()" << std::endl;
     _osgViewer->frame();
 
+    glFlush();
 
     // if just inited copy the FBO texture to the Quick texture
     if(!_initialized)
@@ -172,7 +155,7 @@ void OsgQuickNode::renderOsgFrame()
     }
 
     // we're done with the osg state, restore the Qt one
-    //saveOsgState();
+    saveOsgState();
 }
 
 void OsgQuickNode::updateFBO()
